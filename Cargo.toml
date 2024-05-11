@@ -28,7 +28,8 @@ thiserror = "1.0"
 presser = { version = "0.3" }
 # Only needed for Vulkan.  Disable all default features as good practice,
 # such as the ability to link/load a Vulkan library.
-ash = { version = ">=0.34, <=0.37", optional = true, default-features = false, features = ["debug"] }
+ash_pre038 = { package = 'ash', version = ">=0.34, <=0.37", optional = true, default-features = false, features = ["debug"] }
+ash = { version = ">=0.38", optional = true, default-features = false, features = ["debug"] }
 # Only needed for visualizer.
 egui = { version = ">=0.24, <=0.27", optional = true, default-features = false }
 egui_extras = { version = ">=0.24, <=0.27", optional = true, default-features = false }
@@ -54,7 +55,7 @@ optional = true
 
 [dev-dependencies]
 # Enable the "loaded" feature to be able to access the Vulkan entrypoint.
-ash = { version = ">=0.34,<=0.37", default-features = false, features = ["debug", "loaded"] }
+ash_pre038 = { package = 'ash', version = ">=0.34, <=0.37", default-features = false, features = ["debug", "loaded"] }
 env_logger = "0.10"
 
 [target.'cfg(windows)'.dev-dependencies]
@@ -73,7 +74,7 @@ features = [
 
 [[example]]
 name = "vulkan-buffer"
-required-features = ["vulkan", "ash/loaded"]
+required-features = ["ash_pre038", "ash_pre038/loaded"]
 
 [[example]]
 name = "d3d12-buffer"
@@ -90,6 +91,7 @@ required-features = ["metal"]
 [features]
 visualizer = ["dep:egui", "dep:egui_extras"]
 vulkan = ["dep:ash"]
+ash_pre038 = ["dep:ash_pre038"]
 d3d12 = ["dep:windows"]
 metal = ["dep:metal"]
 # Expose helper functionality for winapi types to interface with gpu-allocator, which is primarily windows-rs driven

@@ -215,7 +215,7 @@ pub(crate) mod allocator;
 #[cfg(feature = "visualizer")]
 pub mod visualizer;
 
-#[cfg(feature = "vulkan")]
+#[cfg(any(feature = "vulkan", feature = "ash_pre038"))]
 pub mod vulkan;
 
 #[cfg(all(windows, feature = "d3d12"))]

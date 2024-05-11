@@ -7,6 +7,8 @@ pub use visualizer::AllocatorVisualizer;
 
 use std::{backtrace::Backtrace, fmt, marker::PhantomData, sync::Arc};
 
+#[cfg(feature = "ash_pre038")]
+use ash_pre038 as ash;
 use ash::vk;
 use log::{debug, Level};
 
@@ -352,12 +354,17 @@ impl MemoryBlock {
         requires_personal_block: bool,
     ) -> Result<Self> {
         let device_memory = {
-            let alloc_info = vk::MemoryAllocateInfo::builder()
+            #[cfg(not(feature = "ash_pre038"))]
+            macro_rules! builder { (vk::$t:tt) => { vk::$t::<'_>::default() } }
+            #[cfg(feature = "ash_pre038")]
+            macro_rules! builder { ($T: ty) => { <$T>::builder() } }
+
+            let alloc_info = builder!(vk::MemoryAllocateInfo)
                 .allocation_size(size)
                 .memory_type_index(mem_type_index as u32);
 
             let allocation_flags = vk::MemoryAllocateFlags::DEVICE_ADDRESS;
-            let mut flags_info = vk::MemoryAllocateFlagsInfo::builder().flags(allocation_flags);
+            let mut flags_info = builder!(vk::MemoryAllocateFlagsInfo).flags(allocation_flags);
             // TODO(manon): Test this based on if the device has this feature enabled or not
             let alloc_info = if buffer_device_address {
                 alloc_info.push_next(&mut flags_info)
@@ -366,7 +373,7 @@ impl MemoryBlock {
             };
 
             // Flag the memory as dedicated if required.
-            let mut dedicated_memory_info = vk::MemoryDedicatedAllocateInfo::builder();
+            let mut dedicated_memory_info = builder!(vk::MemoryDedicatedAllocateInfo);
             let alloc_info = match allocation_scheme {
                 AllocationScheme::DedicatedBuffer(buffer) => {
                     dedicated_memory_info = dedicated_memory_info.buffer(buffer);
